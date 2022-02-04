@@ -1,7 +1,14 @@
+# Description
+This project is a wrapper of the xslxwriter project, in order to easily convert a single CSV file, or mutliple CSV files into XSLX files. It can be used both as a python library, or as a standalone script.
+
 # Requirements
-Only the xlsxwriter library is required.
+Only the xlsxwriter python library is required: https://github.com/jmcnamara/XlsxWriter
 
 # Installation
+## Windows
+```
+python3.exe setup.py install
+```
 ## Linux
 ```
 sudo make install

@@ -236,7 +236,7 @@ if __name__ == '__main__':
     parser.add_argument('--no-verify', action='store_true', help='Don\'t verify CSV file consistency')
     parser.add_argument('--no-merge', action='store_true', help='Don\'t merge files into a single XLSX file')
     parser.add_argument('-f', '--filter', default=DEFAULT_FILE_REGEX, help='Filename filter with regex. Default is \'{}\')'.format(DEFAULT_FILE_REGEX))
-    parser.add_argument('-O', '--overwrite', action='store_true', help='Overwrite existing file')
+    parser.add_argument('-O', '--overwrite', action='store_true', help='Overwrite existing XLSX output file')
     parser.add_argument('-r', '--recurse', action='store_true', help='Process directories recursively')
     parser.add_argument('input', nargs='+', help='Input CSV file or directory')
 
