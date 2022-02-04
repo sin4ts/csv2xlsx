@@ -11,10 +11,10 @@ if os.path.isfile(requirement_path):
 setup(name = 'csv2xlsx',
     version = '1.0',
     description = 'Convert CSV file to XLSX',
-    long_description=open('README.md').read(),
     author = 'sin4ts',
     license= 'MIT License',
     platforms= 'any',
+    scripts=['csv2xlsx'],
     author_email = 'stan102@hotmail.fr',
     url = 'https://github.com/sin4ts/csv2xlsx',
     install_requires = install_requires
