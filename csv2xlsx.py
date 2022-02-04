@@ -6,11 +6,7 @@ import os
 import csv
 import sys
 import argparse
-try:
-    import xlsxwriter
-except ImportError:
-    print('xlsxwriter is required for this script. Please run: apt install python3-xlsxwriter')
-    sys.exit(1)
+import xlsxwriter
 
 class FileExistsException(Exception):
     def __init__(self, filepath):
@@ -20,13 +16,16 @@ class FileExistsException(Exception):
         return 'File already exists: {}'.format(self.filepath)
 
 DEFAULT_OUTPUT_FILENAME = 'csv2xlsx-output.xlsx'
+MAX_COLUMN_WIDTH = 150
 
-def process_csv(row_list, output_path=DEFAULT_OUTPUT_FILENAME, workbook=None, title=None, auto_size=True, filter_first_row=True, freeze_first_row=True, header=True, close_workbook=True):
+def process_csv(row_list, output_path=DEFAULT_OUTPUT_FILENAME, workbook=None, title=None, auto_size=True, filter_first_row=True, freeze_first_row=True, header=True, close_workbook=True, force=False):
     if workbook is None:
         if os.path.exists(output_path):
-            raise FileExistsException(output_path)
-        else:
-            workbook = xlsxwriter.Workbook(output_path)
+            if not force:
+                raise FileExistsException(output_path)
+            else:
+                os.unlink(output_path)
+        workbook = xlsxwriter.Workbook(output_path)
 
     if title is not None:
         #Worksheet title is limiter to 31 characters
@@ -88,7 +87,7 @@ def process_csv(row_list, output_path=DEFAULT_OUTPUT_FILENAME, workbook=None, ti
 
     if auto_size:
         for index in range(len(column_width_list)):
-            column_width = column_width_list[index]
+            column_width = min(column_width_list[index], MAX_COLUMN_WIDTH)
             worksheet.set_column(index, index, column_width)
 
     if close_workbook:
@@ -97,7 +96,7 @@ def process_csv(row_list, output_path=DEFAULT_OUTPUT_FILENAME, workbook=None, ti
     else:
         return workbook
 
-def process_file(input_path, output_path=None, workbook=None, title=None, encoding='utf-8', header=True, delimiter='\t', quotechar=None):
+def process_file(input_path, output_path=None, workbook=None, title=None, encoding='utf-8', header=True, delimiter='\t', quotechar=None, force=False):
     input_filename = os.path.basename(input_path)
     input_dirname = os.path.dirname(input_path)
     if input_filename.lower().endswith('.csv'):
@@ -124,11 +123,11 @@ def process_file(input_path, output_path=None, workbook=None, title=None, encodi
         csv_reader = csv.reader(csvfile, delimiter=delimiter, quotechar=quotechar)
         row_list = list(csv_reader)
 
-    workbook = process_csv(row_list, output_path=output_path, workbook=workbook, title=title, header=header, close_workbook=False)
+    workbook = process_csv(row_list, output_path=output_path, workbook=workbook, title=title, header=header, close_workbook=False, force=force)
     print('Imported : {}'.format(input_path))
     return workbook
 
-def process_directory(input_path, output_path=None, encoding='utf-8', header=True, delimiter='\t', quotechar=None, merge=True, file_regex=None, workbook=None, recurse=False):
+def process_directory(input_path, output_path=None, encoding='utf-8', header=True, delimiter='\t', quotechar=None, merge=True, file_regex=None, workbook=None, recurse=False, force=False):
     for entry in os.listdir(input_path):
         path = os.path.join(input_path, entry)
         if os.path.isdir(path) and recurse:
@@ -138,20 +137,20 @@ def process_directory(input_path, output_path=None, encoding='utf-8', header=Tru
                 workbook.close()
                 workbook=None
         elif os.path.isfile(path) and (file_regex is None or file_regex.strip() == '' or re.match(file_regex, entry)):
-            workbook = process_file(path, output_path, encoding=encoding, workbook=workbook, delimiter=delimiter, quotechar=quotechar, header=header)
+            workbook = process_file(path, output_path, encoding=encoding, workbook=workbook, delimiter=delimiter, quotechar=quotechar, header=header, force=force)
             if workbook is not None and not merge:
                 print('Data written to {}'.format(workbook.filename))
                 workbook.close()
                 workbook=None
     return workbook
 
-def run(input_path_list, output_path=None, merge=True, encoding='utf-8', delimiter='\t', quotechar=None, header=True, file_regex=None, recurse=False):
+def run(input_path_list, output_path=None, merge=True, encoding='utf-8', delimiter='\t', quotechar=None, header=True, file_regex=None, recurse=False, force=False):
     workbook = None
     for input_path in input_path_list:
         if os.path.isdir(input_path):
-            workbook = process_directory(input_path, output_path, header=header, workbook=workbook, encoding=encoding, delimiter=delimiter, quotechar=quotechar, merge=merge, file_regex=file_regex, recurse=recurse)
+            workbook = process_directory(input_path, output_path, header=header, workbook=workbook, encoding=encoding, delimiter=delimiter, quotechar=quotechar, merge=merge, file_regex=file_regex, recurse=recurse, force=force)
         else:
-            workbook = process_file(input_path, output_path, workbook=workbook, encoding=encoding, delimiter=delimiter, quotechar=quotechar, header=header)
+            workbook = process_file(input_path, output_path, workbook=workbook, encoding=encoding, delimiter=delimiter, quotechar=quotechar, header=header, force=force)
         if not merge and workbook is not None:
             print('Data written to {}'.format(workbook.filename))
             workbook.close()
@@ -163,6 +162,9 @@ def run(input_path_list, output_path=None, merge=True, encoding='utf-8', delimit
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    #output_group = parser.add_mutually_exclusive_group()
+    #output_group.add_argument('-o', '--output', help='Output XLSX filepath (default: {})'.format(DEFAULT_OUTPUT_FILENAME))
+    #output_group.add_argument('-a', '--add', help='Add new sheet to an existing  XLSX file')
     parser.add_argument('-o', '--output', help='Output XLSX filepath (default: {})'.format(DEFAULT_OUTPUT_FILENAME))
     parser.add_argument('-d', '--delimiter', default='\t', help='CSV delimiter character (default: TAB)')
     parser.add_argument('-q', '--quotechar', default=None, help='CSV quotechar character (default: None)')
@@ -170,6 +172,7 @@ if __name__ == '__main__':
     parser.add_argument('--no-header', action='store_true', help='Don\'t process first row as header')
     parser.add_argument('--no-merge', action='store_true', help='Don\'t merge files into a single XLSX file')
     parser.add_argument('-f', '--filter', default='.*\\.[C^c][S^s][V^v]$', help='Filename filter with regex (default: \'.*\\.[C^c][S^s][V^v]$\')')
+    parser.add_argument('-F', '--force', action='store_true', help='Overwrite existing file')
     parser.add_argument('-r', '--recurse', action='store_true', help='Process directories recursively')
     parser.add_argument('input', nargs='+', help='Input CSV file or directory')
 
@@ -181,7 +184,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     try:
-        run(args.input, output_path=args.output, header=(not args.no_header), merge=(not args.no_merge), delimiter=args.delimiter, quotechar=args.quotechar, encoding=args.encoding, file_regex=args.filter, recurse=args.recurse)
+        run(args.input, output_path=args.output, header=(not args.no_header), merge=(not args.no_merge), delimiter=args.delimiter, quotechar=args.quotechar, encoding=args.encoding, file_regex=args.filter, recurse=args.recurse, force=args.force)
     except FileExistsException as e:
         print(e)
         print('Export aborted')
