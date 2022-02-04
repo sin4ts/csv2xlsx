@@ -1,3 +1,6 @@
 *.xlsx
 *.csv
 *.pyc
+*.egg-info
+dist
+build
