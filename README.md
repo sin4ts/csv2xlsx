@@ -2,25 +2,15 @@
 Only the xlsxwriter library is required.
 
 # Installation
-## Windows
-TODO
-
 ## Linux
 ```
 sudo make install
-```
-
-## Standalone
-csv2xlsx can also be used in standalone mode:
-```
-python3 csv2xlsx.py .
 ```
 
 # Usage
 ## Windows
 ```
 python3.exe csv2xlsx.py DIRECTORY ADDITIONAL_FILE.csv -d '|' -q none
-dist/csv2xlsx.exe DIRECTORY ADDITIONAL_FILE.csv -d '|' -q none
 ```
 
 ## Linux
@@ -39,9 +29,9 @@ csv2xslx.process_directory('.')
 # Doc
 ## csv2xlsx [python standalone script]
 ```
-usage: csv2xlsx [-h] [-o OUTPUT] [-d DELIMITER] [-q QUOTECHAR] [-e ENCODING] [--no-header]
-                [--no-verify] [--no-merge] [-f FILTER] [-F] [-r]
-                input [input ...]
+usage: csv2xlsx.py [-h] [-o OUTPUT] [-d DELIMITER] [-q QUOTECHAR] [-e ENCODING] [--no-header]
+                   [--no-verify] [--no-merge] [-f FILTER] [-O] [-r]
+                   input [input ...]
 
 positional arguments:
   input                 Input CSV file or directory
@@ -51,17 +41,18 @@ optional arguments:
   -o OUTPUT, --output OUTPUT
                         Output XLSX filepath (default: csv2xlsx-output.xlsx)
   -d DELIMITER, --delimiter DELIMITER
-                        CSV delimiter character (default: TAB)
+                        CSV delimiter character. Default is ",". Set to TAB to use tabulation as
+                        delimiter
   -q QUOTECHAR, --quotechar QUOTECHAR
-                        CSV quotechar character (default: None)
+                        CSV quotechar character. Default: " . Set to NONE to disable quotechar
   -e ENCODING, --encoding ENCODING
-                        File encoding (default: UTF-8)
+                        File encoding. Default is UTF-8
   --no-header           Don't process first row as header
   --no-verify           Don't verify CSV file consistency
   --no-merge            Don't merge files into a single XLSX file
   -f FILTER, --filter FILTER
-                        Filename filter with regex (default: '.*\.[C^c][S^s][V^v]$')
-  -F, --force           Overwrite existing file
+                        Filename filter with regex. Default is '.*\.[C^c][S^s][V^v]$')
+  -O, --overwrite       Overwrite existing file
   -r, --recurse         Process directories recursively
 ```
 

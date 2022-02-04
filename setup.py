@@ -9,7 +9,7 @@ if os.path.isfile(requirement_path):
         install_requires = f.read().splitlines()
 
 setup(name = 'csv2xlsx',
-    version = '1.0',
+    version = '1.1',
     description = 'Convert CSV file to XLSX',
     author = 'sin4ts',
     license= 'MIT License',
