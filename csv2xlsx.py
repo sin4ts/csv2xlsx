@@ -21,12 +21,12 @@ DEFAULT_DELIMITER=','
 DEFAULT_QUOTECHAR='"'
 DEFAULT_FILE_REGEX=r'.*\.[C^c][S^s][V^v]$'
 
-def verify_csv_file(input_path, delimiter, quotechar):
+def verify_csv_file(input_path, delimiter, quotechar, encoding='utf-8'):
     common_delimiter_list = [',', ';', '|', '\t']
     common_quotechar_list = ['"', '\'']
     suggested_delimiter = delimiter
     suggested_quotechar = quotechar
-    with open(input_path, 'r') as f:
+    with open(input_path, 'r', encoding=encoding, errors='ignore') as f:
         first_line = f.readline()
 
         # Detect delimiter
