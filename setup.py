@@ -3,20 +3,32 @@ import shutil
 
 from setuptools import setup
 
+def get_version(filepath):
+    with open(filepath, 'r') as fd:
+        for line in fd.readlines():
+            if line.startswith('__version__'):
+                return line.split('=')[1].strip().replace('\'', '').replace('"', '')
+
 requirement_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'requirements.txt')
 install_requires = []
 if os.path.isfile(requirement_path):
     with open(requirement_path) as f:
         install_requires = f.read().splitlines()
 
+source_script_name = 'csv2xlsx.py'
+target_script_name = 'csv2xlsx'
+version = get_version(source_script_name)
+
 script_list = []
 if os.name == 'posix':
-    shutil.copy('csv2xlsx.py', 'csv2xlsx')
-    script_list = ['csv2xlsx']
+    shutil.copy(source_script_name, target_script_name)
+    script_list = [target_script_name]
+else:
+    raise Exception('Not Yet Implemented')
 
 
 setup(name = 'csv2xlsx',
-    version = '1.1',
+    version = version,
     description = 'Convert CSV file to XLSX',
     author = 'sin4ts',
     license = 'MIT License',
@@ -28,4 +40,4 @@ setup(name = 'csv2xlsx',
 )
 
 if os.name == 'posix':
-    os.unlink('csv2xlsx')
+    os.unlink(target_script_name)
